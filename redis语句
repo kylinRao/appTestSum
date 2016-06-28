@@ -150,3 +150,45 @@ SORT key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]] [ASC|
     OK
     #由于没有数据了，因此返回nil。
     redis 127.0.0.1:6379> randomkey
+    语法
+redis HGETALL命令的基本语法如下所示：  [HASH]
+
+redis 127.0.0.1:6379> HGETALL KEY_NAME 
+例子
+redis 127.0.0.1:6379> HSET myhash field1 "foo"
+(integer) 1
+redis 127.0.0.1:6379> HSET myhash field2 "bar"
+(integer) 1
+redis 127.0.0.1:6379> HGETALL myhash
+1) "field1"
+2) "Hello"
+3) "field2"
+4) "World"
+【zset类型】
+   zset是在set的基础上增加了顺序，形成一个有序的集合。
+   zset的常见操作：
+   （1）zadd
+       向有序集合zset中增加一个元素。例如：zadd zset 1 Hello
+   （2）zrange
+       输出zset中指定范围内的的所有元素，按照score从小到大的顺序。
+       例如：zrange zset 0 -1 withscores，表示输出有序集 合zset中所有的元素，并且输出顺序号。
+   （3）zrem
+       删除名称为key的zset集合中的元素member。例如：zrem set1 Hello。
+   （4）zincrby
+       把有序集合zset中的指定元素的序列号加上指定的值。例如：zincrby zset 4 Hello
+   （5）zrank
+       返回名称为key的zset集合中元素的排名，按照下标从小到大的排名。例如：zrank zset Hello。
+   （6）zrevrank
+       返回名称为key的zset集合中元素的排名，按照下表从大到小的排名。例如：zrevrank zset Hello。
+   （7）zrevrange
+       按照score从大到小的顺序输出集合中所有元素。例如：zrevrange zset 0 -1 withscores。
+   （8）zrangebyscore
+       返回集合中给定区间的元素。例如：zrangebyscore zset 2 3 withscores
+   （9）zcount
+       返回集合中score在给定区间的数量。zcount zset 2 3
+   （10）zcard
+       返回集合中元素的个数。
+   （11）zremrangebyrank
+       按照索引来删除给定区间的元素。例如：zremrangebyrank zset 1 2
+   （12）zremrangebyscore
+       删除score在指定范围内的元素。例如：zremrangebyscore zset 1 2
