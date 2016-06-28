@@ -1,0 +1,65 @@
+一 、【准备工作】 
+步骤1：安装USB驱动 
+        手机进入设置-应用程序-开发-USB调试，将第一个选项打钩选中。然后通过USB线连接电脑，启动豌豆荚，豌豆荚会帮你装好手机的驱动。 
+步骤2：软件准备 
+1、把ADB工具 adb.rar (376 K)  
+2、运行中，输入cmd进入命令提示符。 
+以下命令均在命令提示符下进行。开始（点开始在输入框里输入CMD） 
+3、 输入cd c:\adb回车，进入ADB所在目录 
+现在就可以进行命令的操作了。 
+【常见问题】：
+adb devices 卡死：
+解决方法：
+配置 adb server 端口，使用一个生僻的值。
+很简单，只要在系统环境变量中定义 ANDROID_ADB_SERVER_PORT 的值即可。
+最好选择一个5位数的端口号（10000 ~ 65535），不易重复。
+win下只要在环境变量中增加一个ANDROID_ADB_SERVER_PORT ，值填你自己定义的端口。
+linux下只要 export $ANDROID_ADB_SERVER_PORT = 自定义端口，即可。
+二、【常用命令】 
+　　要使用adb命令，手机需要打开USB 调试。 
+　　安装软件 
+　　adb install apk (文件名称.apk) 
+　　重新安装该软件 
+　　adb install -r apk (文件名称.apk) 
+　　卸载apk软件 
+　　adb uninstall apk  (包名.apk) 
+　　查看手机上的运行日志，此项可以用来查错 
+　　adb logcat 
+　　查看手机是否连接，以及连接了几台手机 
+　　adb devices 
+　　A为手机路径，B为电脑路径，意思为：把文件从手机中复制到电脑上 
+　　adb pull <A> <B> 
+　　A为手机路径，B为电脑路径，意思为：把文件从电脑复制到手机上 
+　　adb push <B> <A> 
+　　进入手机的超级终端Terminal  
+　　adb shell  
+　　重新挂载文件系统 
+　　adb remount 
+　　重启手机 
+　　adb reboot 
+　　重启到Recovery界面 
+　　adb reboot recovery 
+　　重启到bootloader界面 
+　　adb reboot bootloader 
+=================================================== 
+　　实际操作举例：刷官方高版本后重新获取ROOT和降级方法 
+　　进行adb运行环境 
+　　adb shell 
+　　设置超级用户模式 
+　　su 
+　　映射出目录 
+　　mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system 
+　　退出su 
+　　exit 
+　　退出shell准备接受下一个adb命令 
+　　exit 
+　　增加flash_image文件到手机上 
+　　adb push flash_image.zip /system/bin/flash_image 
+　　recovery先复制到卡上 
+　　adb push recovery-RA-heroc-v1.6.2.img /sdcard 
+　　再次进入adb环境 
+　　adb shell 
+　　修改文件属性 
+　　chmod 0755 /system/bin/flash_image 
+　　重启系统 
+　　reboot 
