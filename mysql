@@ -1,0 +1,159 @@
+显示所有用户，mysql的基本操作
+
+
+github http://janedoneway.iteye.com/blog/1628438
+可以实现显示数据库中所有用户。
+select user from mysql.user;
+select user,host,password from mysql.user;
+
+给表创建用户，授权：
+The create user command:
+<!---->mysql> CREATE USER taskmgr IDENTIFIED BY 'Huawei';
+yy表示你要建立的用户名，后面的123表示密码
+上面建立的用户可以在任何地方登陆。
+如果要限制在固定地址登陆，比如localhost 登陆：
+<!---->mysql> CREATE USER yy@localhost IDENTIFIED BY '123';
+
+grant:
+<!---->mysql> GRANT ALL PRIVILEGES ON *.* TO user;@localhost
+ 
+<!---->grant select,insert,update,delete on *.* to test1@"%" Identified by "abc";
+grant select,insert,update,delete on *.* to test1@"%" Identified by "abc";
+格式：grant select on 数据库.* to 用户名@登录主机 identified by "密码"
+ 
+ 
+修改密码：
+ 
+<!---->mysql> grant   all   privileges   on   pureftpd.*   to   koko@localhost   identified   by   'mimi';  
+
+
+flush:
+<!---->mysql> flush privileges;
+ 
+ 
+查看用户信息：
+<!---->mysql> select host,user from mysql.user; 
+mysql 显示所有的数据库
+
+2013-07-24 | 分类: SQL | 标签：数据库  mysql   | 浏览()
+mysql 显示所有的数据库，代码如下：
+mysql> show databases[喝小酒的网摘]http://blog.hehehehehe.cn/a/1854.htm
+    -> ;
+mysql> show tables;
+MySQL显示命令
+二、显示命令 
+1、显示数据库列表。 
+show databases; 
+2、显示库中的数据表： 
+use mysql;
+show tables; 
+3、显示数据表的结构： 
+describe 表名; 
+4、建库： 
+create database 库名; 
+5、建表： 
+use 库名； 
+create table 表名 (字段设定列表)； 
+6、删库和删表: 
+drop database 库名; 
+drop table 表名； 
+7、将表中记录清空： 
+delete from 表名; 
+8、显示表中的记录： 
+select * from 表名
+[喝小酒的网摘]http://blog.hehehehehe.cn/a/1854.htm
+转载自 [blog.hehehehehe.cn]喝小酒的网摘 及本文链接地址:http://blog.hehehehehe.cn/a/1854.htm
+相关文章
+MySql中delimiter的作用
+这个命令其实就是告诉mysql解释器，该段命令是否已经结束了，mysql是否可以执行了。
+默认情况下，delimiter是分号;。在命令行客户端中，如果有一行命令以分号结束，
+那么回车后，mysql将会执行该命令。如输入下面的语句
+mysql> select * from test_table;
+然后回车，那么MySQL将立即执行该语句
+sql 2005 安装日志位置
+如何查看 SQL Server 2005 安装日志文件
+
+Microsoft SQL Server 安装日志在此版本中有所更改。应查看的主日志位于
+
+%ProgramFiles%Microsoft SQL Server90Setup BootstrapLOGSummary.txt
+
+此文件包含如下内容：
+SQL Server 全局变量
+@@SERVERNAME : 返回运行SQL Server 2000本地服务器的名称。
+@@REMSERVER : 返回登录记录中记载的远程SQL Server服务器的名称。
+＠＠CONNECTIONS : 返回自上次启动SQL Server以来连接或试图连接的次数，用其可让管理人员方便地了解今天所有试图连接服务器的次数。
+@@CURSO
+Sql Server编制全文索引
+全文索引是解决海量数据模糊查询的较好解决办法。
+全文检索可以对varchar,text,image型字段进行检索,但一个表最多只能建一个全文索引
+SQL Server 2000 引入了对存储在 image 列中的这些类型的数据执行全文检索的能力。
+
+如果没有全文索引，对字符的模糊查询只能对基表进行全表扫描（或索引扫描），
+执行模
+SQL,Server常用到的几个设置选项
+1. SET DEADLOCK_PRIORITY
+2. SET LOCK_TIMEOUT
+3.@@LOCK_TIMEOUT
+4.SET IDENTITY_INSERT
+5.SET IMPLICIT_TRANSACTIONS
+6.SET NOCOUNT
+7.@@ROWCOUNT
+8.SET ROWCOU
+--------------------------------------------------------------------------------------------------------
+使用root用户登陆mysql：mysql  -uroot -p然后输入空密码
+创建database：
+create database taskmgr；
+给表创建用户，授权：
+The create user command:
+<!---->mysql> CREATE USER taskmgr IDENTIFIED BY 'Huawei';
+使用taskmgr数据库：
+use taskmgr;
+创建表:
+migrate BEGIN;
+--
+-- Create model Author
+--
+CREATE TABLE  books_author  ( id  integer AUTO_INCREMENT NOT NULL PRIMARY KEY,first_name  varchar(30) NOT NULL, last_name  varchar(40) NOT NULL,  email  varchar(254) NOT NULL);
+--
+-- Create model Book
+--
+CREATE TABLE  books_book  ( id  integer AUTO_INCREMENT NOT NULL PRIMARY KEY,  title  varchar(100) NOT NULL,  publication_date  date NOT NULL);
+CREATE TABLE  books_book_authors  ( id  integer AUTO_INCREMENT NOT NULL primary key,  book_id  integer NOT NULL,  author_id  integer NOT NULL);
+--
+-- Create model Publisher
+--
+CREATE TABLE  books_publisher  ( id  integer AUTO_INCREMENT NOT NULL PRIMARY KEY,  name  varchar(30) NOT NULL,  address  varchar(50) NOT NULL,  city  varchar(60) NOT NULL,  state_province  varchar(30) NOT NULL,  country  varchar(50) NOT NULL,  website  varchar(200) NOT NULL);
+--
+-- Add field publisher to book
+--
+ALTER TABLE  books_book  ADD COLUMN  publisher_id  integer NOT NULL;
+ALTER TABLE  books_book  ALTER COLUMN  publisher_id  DROP DEFAULT;
+ALTER TABLE  books_book_authors  ADD CONSTRAINT  books_book_authors_book_id_ed3433e7_fk_books_book_id  FOREIGN KEY ( book_id ) REFERENCES  books_book  ( id );
+ALTER TABLE  books_book_authors  ADD CONSTRAINT  books_book_authors_author_id_984f1ab8_fk_books_author_id  FOREIGN KEY ( author_id ) REFERENCES  books_author  (
+ id );
+ALTER TABLE  books_book_authors  ADD CONSTRAINT  books_book_authors_book_id_8714badb_uniq  UNIQUE ( book_id ,  author_id );
+CREATE INDEX  books_book_2604cbea  ON  books_book  ( publisher_id );
+ALTER TABLE  books_book  ADD CONSTRAINT  books_book_publisher_id_189e6c56_fk_books_publisher_id  FOREIGN KEY ( publisher_id ) REFERENCES  books_publisher  ( id 
+);
+
+COMMIT;
+使用python + django给表添加数据：
+----------------------------------------------------------while循环-------------------------------------------------------------------------------
+while 循环语句怎么写：
+delimiter //
+drop procedure if exists test_while; 
+create procedure test_while ()
+     BEGIN
+         declare count INT default 0;
+
+         while count < 100000 do
+             set count = count + 1;
+
+             insert into tutorials_tbl (tutorial_id) values (count);
+
+         end while;
+
+         select count;
+ END
+ //
+ call test_while();
