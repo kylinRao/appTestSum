@@ -179,7 +179,7 @@ redis 127.0.0.1:6379> HGETALL myhash
    （5）zrank
        返回名称为key的zset集合中元素的排名，按照下标从小到大的排名。例如：zrank zset Hello。
    （6）zrevrank
-       返回名称为key的zset集合中元素的排名，按照下表从大到小的排名。例如：zrevrank zset Hello。
+       返回名称为key的zset集合中元素的排名，按照下表从大到小的排名。例如：hzrevrank zset Hello。
    （7）zrevrange
        按照score从大到小的顺序输出集合中所有元素。例如：zrevrange zset 0 -1 withscores。
    （8）zrangebyscore
