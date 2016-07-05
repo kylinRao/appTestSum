@@ -1,0 +1,44 @@
+一． Fiddler内置命令。
+上一节(使用Fiddler进行抓包分析)中，介绍到，在web session（与我们通常所说的session不是同一个概念，这里的每条HTTP请求都成为一个session）界面中可以看到Fiddler抓取的所有HTTP请求.而为了更加方便的管理所有的session, Fiddler提供了一系列内置的函数用于筛选和操作这些session(习惯命令行操作linux的童鞋应该可以感受到这会有多么方便).输入命令的位置在web session管理面板的下方（通过快捷键alt+q可以focus到命令行）.
+
+Fiddler内置的命令有如下几种：
+
+1. select命令。
+选择所有相应类型（指content-type）为指定类型的HTTP请求，如选择图片，使用命令select image.而select css则可以选择所有相应类型为css的请求，select html则选择所有响应为HTML的请求（怎么样，是不是跟SQL语句很像？）。如图是执行select image之后的结果：
+
+
+2. allbut命令。
+allbut命令用于选择所有响应类型不是给定类型的HTTP请求。如allbut image用于选择所有相应类型不是图片的session(HTTP请求)，该命令还有一个别名keeponly.需要注意的是，keeponly和allbut命令是将不是该类型的session删除，留下的都是该类型的响应。因此，如果你执行allbut xxxx（不存在的类型），实际上类似与执行cls命令（删除所有的session, ctrl+x快捷键也是这个作用）
+
+3. ?text命令
+选择所有 URL 匹配问号后的字符的全部 session
+
+4. >size 和 <size命令
+选择响应大小大于某个大小（单位是b）或者小于某个大小的所有HTTP请求
+
+5. =status命令
+选择响应状态等于给定状态的所有HTTP请求。
+
+例如，选择所有状态为200的HTTP请求：=200
+
+6. @host命令
+选择包含指定 HOST 的全部 HTTP请求。例如：@csdn.net
+
+选择所有host包含csdn.net的请求
+
+7. Bpafter， Bps, bpv, bpm, bpu
+这几个命令主要用于批量设置断点
+
+Bpafter xxx: 中断 URL 包含指定字符的全部 session 响应
+
+Bps xxx: 中断 HTTP 响应状态为指定字符的全部 session 响应。
+
+Bpv xxx: 中断指定请求方式的全部 session 响应
+
+Bpm xxx: 中断指定请求方式的全部 session 响应。等同于bpv xxx
+
+Bpu xxx:与bpafter类似。
+
+当这些命令没有加参数时，会清空所有设置了断点的HTTP请求。
+
+ 更多的其他命令可以参考Fiddler官网手册。
