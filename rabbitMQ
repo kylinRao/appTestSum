@@ -1,1 +1,152 @@
-asdfa
+http://blog.csdn.net/linvo/article/details/5752773
+
+安装Erlang环境
+1、下载： http://erlang.org/download.html 
+自己根据需要下载源码包或win的二进制包
+2、安装：
+windows环境就没啥好说的了，一路next~
+主要说下linux环境，其实我用的ubuntu10.04已经预装了erlang，版本是RB13B03，但是貌似不支持最新版的RabbitMQ
+对于想使用最新版RabbitMQ或还没有安装erlang环境的童鞋，需要重新安装下最新版的erlang
+目前Erlang官方最新版本是R14A， 首先需要先安装一些依赖包
+ 
+sudo apt-get install build-essential 
+sudo apt-get install libncurses5-dev 
+sudo apt-get install m4 
+sudo apt-get install libssl-dev
+sudo apt-get install libc6
+sudo apt-get install unixODBC
+sudo apt-get install unixODBC-devel
+sudo apt-get install gcj -----------------》好几十兆，主要用于java，暂时对我没用，所以我没装它:P
+正式开始装了
+./configure --without-javac ----------》因为我没有安装gcj，所以configure时关闭了javac选项
+make 
+sudo make install
+没意外的话erlang就装完了，可以用whereis erlang看一下
+ 
+安装RabbitMQ
+ubuntu用户的话其实可以直接使用apt-get自动化搞定
+sudo apt-get install rabbitmq-server
+安装完毕后会自动启动服务，一切就这么简单:)
+下面说下一般方法
+ 
+1、下载：http://www.rabbitmq.com/server.html
+普通linux用户建议下载普通源码包 Packaged for generic Unix systems
+windows用户就直接下载windows包 Packaged for Windows systems
+2、安装（linux&windows）：
+其实RabbitMQ现在已经算是个绿色软件，免安装
+一般建议解压后，直接把整个目录拷贝到erlang的lib下
+3、运行（linux&windows）：
+rabbitmq中sbin目录下是相关的工具脚本
+通过执行该脚本即可运行（非守护）
+【linux】sudo rabbitmq_server-1.8.1/sbin/rabbitmq-server
+【windows】rabbitmq_server-1.8.1/sbin/rabbitmq-server.bat
+关于windows用户：
+1、需要设置环境变量ERLANG_HOME为erlang的根目录（具体就不用细说了吧~）
+2、若需服务方式运行可以使用rabbitmq-service.bat进行安装服务（win7用户注意权限问题）
+ 
+ 
+安装py-amqplib
+正如那篇《[RabbitMQ+Python入门经典] 兔子和兔子窝》所说
+根据你的需求，py-amqplib或者txAMQP都是可以的。因为是基于Twisted的，txAMQP可以保证用异步IO构建超高性能的AMQP程序。但是Twisted编程本身就是一个很大的主题……因此清晰起见，我们打算用 py-amqplib。
+1、下载：http://barryp.org/software/py-amqplib/
+2、安装：
+非常easy，解压后进入目录直接
+【linux】sudo ./setup.py install
+【windows】python setup.py install
+欧了，安装完毕，可以在python中import了:)
+ 
+简单Demo测试
+ 
+py-amqplib中带有简单的demo，在amqplib-0.6/demo中，我们先用这俩测试下消息的发送和接受
+ 
+demo_receive.py -------------------》消息消费者
+demo_send.py ----------------------》消息生产者
+运行RabbitMQ后，先运行 ./demo_receive.py，创建Broker（其实就是交换机和队列啦）
+接着另开一终端，运行 ./demo_send.py "hello, Linvo"
+哇，在第一个终端显示出来了，好神奇啊~~~
+ 
+运行时可以指定RabbitMQ的host、userid、password等参数，默认host是本机，userid和password都是guest
+自己可以通过rabbitmqctl工具来删除、新建用户，并设置权限等
+./rabbitmqctl delete_user guest -------》删除默认的guest用户
+./rabbitmqctl add_user linvo 111 ---------》添加新用户linvo，密码111
+./rabbitmqctl set_permissions -p / linvo ".*" ".*" ".*" -----------》设置linvo在/的虚拟主机的权限和之前的guest一样
+PS：暂时没弄懂明白具体的权限正则规则 囧@&^%$…… 
+再测试就改这样了
+ 
+./demo_receive.py -u linvo -p 111
+./demo_send.py -u linvo -p 111 "hello,Linvo"
+ 
+rabbitmqctl的更多功能可参考官方文档 http://www.rabbitmq.com/rabbitmqctl.1.man.html，或者自行google:P
+ 
+DIY Demo测试
+自己也依葫芦画瓢了一个:D
+receive.py
+[python] view plain copy print?
+#!/usr/bin/env python  
+#coding=utf-8  
+import amqplib.client_0_8 as amqp  
+def showmsg(msg):  
+    print msg.body  
+    msg.channel.basic_ack(msg.delivery_tag)  
+    if msg.body == 'quit':  
+        msg.channel.basic_cancel(msg.consumer_tag)  
+def main():  
+    server = {'host':'localhost', 'userid':'linvo', 'password':'111', 'ssl':False}  
+    x_name = 'x1'  
+    q_name = 'q1'  
+    conn = amqp.Connection( server['host'],   
+                            userid=server['userid'],   
+                            password=server['password'],   
+                            ssl=server['ssl'])  
+    ch = conn.channel()  
+    ch.access_request('/data', active=True, read=True)  
+    ch.exchange_declare(exchange=x_name, type='fanout', durable=True, auto_delete=False)  
+    ch.queue_declare(queue=q_name, durable=True, exclusive=False, auto_delete=False)  
+    ch.queue_bind(queue=q_name, exchange=x_name)  
+    ch.basic_consume(q_name, callback=showmsg)  
+    while ch.callbacks:  
+        ch.wait()  
+    ch.close()  
+    conn.close()  
+if __name__ == '__main__':  
+    main()  
+ 
+ 
+send.py
+[python] view plain copy print?
+#!/usr/bin/env python  
+#coding=utf-8  
+import amqplib.client_0_8 as amqp  
+def main():  
+    server = {'host':'localhost', 'userid':'linvo', 'password':'111', 'ssl':False}  
+    x_name = 'x1'  
+      
+    conn = amqp.Connection( server['host'],   
+                userid=server['userid'],  
+                password=server['password'],   
+                ssl=server['ssl'])  
+    ch = conn.channel()  
+    ch.access_request('/data', active=True, write=True)  
+    ch.exchange_declare(exchange=x_name, type='fanout', durable=True, auto_delete=False)  
+    retry = True  
+    while retry:  
+        msg_body = raw_input('>')  
+        msg = amqp.Message(msg_body, content_encoding='UTF-8')  
+        msg.properties['delivery_mode'] = 2  
+        ch.basic_publish(msg, x_name)  
+          
+        if msg_body == 'quit':  
+            retry = False  
+      
+    ch.close()  
+    conn.close()  
+if __name__ == '__main__':  
+    main()  
+ 
+ 
+发送消息
+
+ 
+接收消息
+
+
