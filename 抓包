@@ -1,0 +1,143 @@
+[tcpdump分析抓包的文章]
+http://www.server110.com/linux/201411/10950.html
+
+TCPDUMP(8)    TCPDUMP(8)
+
+NAME
+       tcpdump - dump traffic on a network
+
+SYNOPSIS
+       tcpdump [ -AdDefIKlLnNOpqRStuUvxX ] [ -B buffer_size ] [ -c count ]
+      [ -C file_size ] [ -G rotate_seconds ] [ -F file ]
+      [ -i interface ] [ -m module ] [ -M secret ]
+      [ -r file ] [ -s snaplen ] [ -T type ] [ -w file ]
+      [ -W filecount ]
+      [ -E spi@ipaddr algo:secret,...]
+      [ -y datalinktype ] [ -z postrotate-command ] [ -Z user ]
+      [ expression 
+--------------------------------
+-option param       
+-s snaplen 指定捕获数据包大小，防止包过大，导致丢失，常用： -s 0  将包大小设置为65535 bytes
+-i interface 指定网络接口名 如 eth0 eth1 等等 
+-w file 指定文件名，存储捕获结果，可以将捕获结果保存为后缀为pcap文件或cap文件，供wireshark 分析工具分析
+-r file 从指定的文件中读取包(这些包一般通过-w选项产生)
+-c count 指定捕获包数量，默认是没有限制，一直捕获下去
+-l >result.txt 将捕获包定向到文本文件
+----------------------------------
+-option
+-v 　　输出一个稍微详细的信息，例如在ip包中可以包括ttl和服务类型的信息；
+-vv 　 输出详细的报文信息；
+-n 不进行地址域名转换
+-nn 不进行端口号服务名转换 如port 22转换为ssh 
+
+-X 以16进制和文本两种方式显示数据包内容
+--------------------------------------------------
+option
+   方向：src,dst,src or dst, src and dst
+   端口：port value
+   范围：host value  单个ip、net netvalue 网络地址（采用192.168.0.0/24格式）、ether  value（MAC地址）、gateway value（网关）
+   逻辑：and ,or ,not,&&,!,||
+   协议：tcp,udp,ip,arp,icmp 
+
+注意tcpdump 中括号一定要转义 ( ) 例如：
+tcpdump -i eth0 host (192.168.59.1 or 192.168.59.133) and tcp 
+--------------------------------------------------
+tcp包相关标志：
+   S=SYN，发起连接标志。
+   P=PUSH，传送数据标志。
+   F=FIN，关闭连接标志。
+   R=RESET，异常关闭连接。
+   . 表示没有任何标志   通常是只发送ACK报文，实际上ACK标准是1.
+   ack    表示确认包。
+
+--------------------------------------------------
+
+1.捕获某个网络接口报文
+
+tcpdump -i eth0
+
+2.捕获某个网口上某个种协议报文
+
+tcpdump -i eth0 tcp
+
+3.捕获某个网口上某个种协议和某个端口报文
+
+   tcpdump -i eth0 tcp port 80
+4.tcpdump -i etho src host 192.168.59.11 and dst port 22
+
+5.tcpdump -i etho src net 192.168.59.0/24 and dst port 22
+
+6.查看捕获数据包文件
+  [root@localhost ~]# tcpdump -r my.pcap
+  reading from file my.pcap, link-type EN10MB (Ethernet)
+  09:39:19.264188 ARP, Request who-has 192.168.59.133 tell 192.168.59.1, length 46
+  09:39:19.264275 ARP, Reply 192.168.59.133 is-at 00:0c:29:27:f4:a8 (oui Unknown), length 28
+
+7.tcpdump -i etho src host 192.168.59.11 and dst port 22 -c 500 -w ssh.pcap
+8.tcpdump -i eth0 tcp port 22 -n -nn -l >tcp.dump
+---------------------------------------
+1.抓eth1的包 
+tcpdump -i eth1 -w /tmp/xxx.cap 
+
+2.抓192.168.1.123的包 
+tcpdump -i eth1 host 192.168.1.123 -w /tmp/xxx.cap 
+
+3.抓192.168.1.123的80端口的包 
+tcpdump -i eth1 host 192.168.1.123 and port 80 -w /tmp/xxx.cap 
+
+4.抓192.168.1.123的icmp的包 
+tcpdump -i eth1 host 192.168.1.123 and icmp -w /tmp/xxx.cap 
+
+5.抓192.168.1.123的80端口和110和25以外的其他端口的包 
+tcpdump -i eth1 host 192.168.1.123 and ! port 80 and ! port 25 and ! port 110-w /tmp/xxx.cap 
+
+6.抓vlan 1的包 
+tcpdump -i eth1 port 80 and vlan 1 -w /tmp/xxx.cap 
+---------------------------------------
+1.注意tcpdump 中括号一定要转义 ( )
+ tcpdump -i eth0 dst host 192.168.59.133 and tcp      tcpdump -i eth0 dst host 192.168.59.133 and tcp and dst port 22 
+ tcpdump -i eth0 dst net 192.168.59.0/24 and tcp and dst port 22 
+ tcpdump -i eth0 host (192.168.59.1 or 192.168.59.133) and tcp 
+
+---------------------------------------
+A想要截获所有210.27.48.1 的主机收到的和发出的所有的数据包：
+#tcpdump host 210.27.48.1
+
+B想要截获主机210.27.48.1 和主机210.27.48.2 或210.27.48.3的通信，使用命令：（在命令行中适用括号时，一定要进行转义）
+#tcpdump host 210.27.48.1 and (210.27.48.2 or 210.27.48.3 )
+
+C如果想要获取主机210.27.48.1除了和主机210.27.48.2之外所有主机通信的ip包，使用命令：
+#tcpdump ip host 210.27.48.1 and ! 210.27.48.2
+
+D如果想要获取主机210.27.48.1接收或发出的telnet包，使用如下命令：
+#tcpdump tcp port 23 host 210.27.48.1
+
+E 对本机的udp 123 端口进行监视 123 为ntp的服务端口
+# tcpdump udp port 123
+
+F 系统将只对名为hostname的主机的通信数据包进行监视。主机名可以是本地主机，也可以是网络上的任何一台计算机。下面的命令可以读取主机hostname发送的所有数据：
+#tcpdump -i eth0 src host hostname
+
+G 下面的命令可以监视所有送到主机hostname的数据包：
+#tcpdump -i eth0 dst host hostname
+
+H 我们还可以监视通过指定网关的数据包：
+#tcpdump -i eth0 gateway Gatewayname
+
+I 如果你还想监视编址到指定端口的TCP或UDP数据包，那么执行以下命令：
+#tcpdump -i eth0 host hostname and port 80
+
+J 如果想要获取主机210.27.48.1除了和主机210.27.48.2之外所有主机通信的ip包
+，使用命令：
+#tcpdump ip host 210.27.48.1 and ! 210.27.48.2
+
+K 想要截获主机210.27.48.1 和主机210.27.48.2 或210.27.48.3的通信，
+#tcpdump host 210.27.48.1 and (210.27.48.2 or 210.27.48.3 )
+
+L 如果想要获取主机210.27.48.1除了和主机210.27.48.2之外所有主机通信的ip包，使用命令：
+#tcpdump ip host 210.27.48.1 and ! 210.27.48.2
+
+M 如果想要获取主机210.27.48.1接收或发出的telnet包，使用如下命令：
+#tcpdump tcp port 23 host 210.27.48.1
+
+转载请注明原文地址：http://www.server110.com/linux/201404/8860.html
