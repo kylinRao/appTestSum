@@ -174,3 +174,39 @@ http {
 
      }
 }
+------------------------常见错误
+nginx集群报错“upstream”directive is not allow here 错误
+
+搭建了一个服务器, 采用的是nginx + apache(多个) + php + mysql(两个) 多个apache负载均衡及后端mysql读写分离的服务器.
+
+当然如果网站流量小的话 就完全没有必要了! 一是搭建起来麻烦,二也增加了维护成本! 当你网站流量达到一定级别不考虑也得考虑了.
+
+当设定好 upstream 如下:
+
+upstream backend {
+server backend1.example.com weight=5;
+server backend2.example.com:8080;
+server unix:/tmp/backend3;
+}
+
+执行命令:/usr/local/nginx/sbin/nginx -s reload 时 报错如下:
+
+[emerg]: "upstream" directive is not allowed here in /usr/local/nginx/conf/nginx.conf:52
+
+后来检查了一下原来是upstream backend 位置放错了, upstream位置应该放在http模块里面 但必须是在server模块的外面. 应该是下面这样的结构:
+
+http{
+
+upstream backend {
+server backend1.example.com weight=5;
+server backend2.example.com:8080;
+server unix:/tmp/backend3;
+} server {
+location / {
+proxy_pass http://backend;
+}
+}
+
+}
+
+如果你配置的服务器也如类似的错误 不妨检查你的upstream位置是否正确!
