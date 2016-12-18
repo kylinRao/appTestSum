@@ -192,3 +192,7 @@ redis 127.0.0.1:6379> HGETALL myhash
        按照索引来删除给定区间的元素。例如：zremrangebyrank zset 1 2
    （12）zremrangebyscore
        删除score在指定范围内的元素。例如：zremrangebyscore zset 1 2
+       
+       
+       补充list的操作方法：
+       http://tech.it168.com/a2011/0926/1251/000001251881.shtml
